@@ -1,4 +1,4 @@
-# bookworm README
+# bookworm
 
 This is the README for your extension "bookworm". After writing up a brief description, we recommend including the following sections.
 
