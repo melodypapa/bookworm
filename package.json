@@ -10,16 +10,28 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:bookworm.helloWorld"
+		"onCommand:bookworm.generateInfo"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "bookworm.helloWorld",
-				"title": "Hello World"
+				"command": "bookworm.generateInfo",
+				"title": "Generate Book Info"
+			},
+			{
+				"command": "bookworm.parsePath",
+				"title": "Parse path"
 			}
-		]
+		],
+		"menus": {
+			"explorer/context":[
+				{
+					"command": "bookworm.generateInfo",
+					"group": "bookworm-ide"
+				}
+			]
+		}
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",
