@@ -1,7 +1,8 @@
 import { Uri, window } from "vscode";
-import { AmazonBookworm, Book } from "./amazon";
+import { AmazonBookParser} from "./parser/amazon.book.parser";
 import * as path from 'path';
 import * as fs from 'fs';
+import { Book } from "./model/book.type";
 
 export class Bookworm {
 
@@ -46,12 +47,12 @@ export class Bookworm {
 	}
 
 	private async getIsbnFromUri(uri: Uri): Promise<string> {
-		let isbn = ""
+		let isbn = "";
 		if (this.urlIsPath(uri)) {
 			isbn = await this.getIsbnFromPath(uri.fsPath);
 		}
 		else {
-			isbn = path.parse(uri.fsPath).name
+			isbn = path.parse(uri.fsPath).name;
 		}
 
 		if (this.isValidIsbn(isbn)) {
@@ -63,7 +64,7 @@ export class Bookworm {
 
 	private createBookInfoFile(filePath: string, book: Book){
 		let data = JSON.stringify(book);
-		fs.writeFileSync(filePath, data)
+		fs.writeFileSync(filePath, data);
 	}
 
 	public async onGenerateBookInfo(uri: Uri) {
@@ -78,7 +79,7 @@ export class Bookworm {
 
 		try {
 			let bookPath = uri.fsPath;
-			const bookworm = new AmazonBookworm();
+			const bookworm = new AmazonBookParser();
 			const book: Book = await bookworm.fetchBook(isbn);
 			console.log(book);
 			if (!this.urlIsPath(uri)){

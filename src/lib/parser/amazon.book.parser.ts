@@ -1,37 +1,24 @@
 import fetch, { Response } from "node-fetch";
 import * as cheerio from "cheerio";
+import { BookParser } from './book.parser';
+import { Book } from "../model/book.type";
 
-export type Book = {
-    name: string;
-    uri: string;
-    publisher?: string;
-    edition?: string;
-    publishDate? : {year: number, month: number, day?: number};
-    asin: string;
-    isbn10?: string;
-    isbn13?: string;
-    language?: string;
-    paperback?: string;
-};
-
-
-export class AmazonBookworm {
+export class AmazonBookParser extends BookParser {
     /** The name list for each month  */
-    private months = [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ];
-
-    constructor() {
-    }
+    private months = [
+        'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
+    ];
 
     private convertMonth(month: string): number {
-        for (let idx = 0; idx < this.months.length; idx ++){
-            if (this.months[idx] === month){
+        for (let idx = 0; idx < this.months.length; idx++) {
+            if (this.months[idx] === month) {
                 return idx + 1;
             }
         }
         return 0;
     }
 
-    private stripBlank(str: string): string{
+    private stripBlank(str: string): string {
         return str.trim();
     }
 
@@ -49,20 +36,20 @@ export class AmazonBookworm {
                     uri: uri,
                     asin: asin
                 };
-                
+
                 const details = {};
-                for (let idx = 0; idx < detailKeyTags.length; idx ++){
-                    const key = $(detailKeyTags[idx]).text().replace(/[\s:]+/ , "").toLowerCase();
+                for (let idx = 0; idx < detailKeyTags.length; idx++) {
+                    const key = $(detailKeyTags[idx]).text().replace(/[\s:]+/, "").toLowerCase();
                     const value = $(detailValueTags[idx]).text();
-                    switch (key){
+                    switch (key) {
                         case "publisher":
-                            const match =  value.match(/([\w\s']+);?([\w\s]+)?\s?\((\w+)\s+(\d{1,2}),\s+(\d{4})\)/);
-                            if (match){
+                            const match = value.match(/([\w\s']+);?([\w\s]+)?\s?\((\w+)\s+(\d{1,2}),\s+(\d{4})\)/);
+                            if (match) {
                                 book.publisher = this.stripBlank(match[1]);
                                 book.edition = this.stripBlank(match[2]);
                                 book.publishDate = {
-                                    year: parseInt(match[5]), 
-                                    month: this.convertMonth(match[3]), 
+                                    year: parseInt(match[5]),
+                                    month: this.convertMonth(match[3]),
                                     day: parseInt(match[4]),
                                 };
                             }
