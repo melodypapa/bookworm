@@ -3,7 +3,7 @@ import { Book } from '../model/book.type';
 import { BookParser } from './book.parser';
 import * as cheerio from 'cheerio';
 
-class DoubanBookParser extends BookParser {
+export class DoubanBookParser extends BookParser {
 
     public fetchBook(isbn: string): Promise<Book> {
         return new Promise(async (resolve, reject) => {
@@ -13,9 +13,9 @@ class DoubanBookParser extends BookParser {
                 const resp: Response = await fetch(uri);
                 const body: string = await resp.text();
                 console.log(body);
-                /*const $ = cheerio.load(body);
-                const detailKeyTags = $("span.a-list-item>span:even", ".detail-bullet-list");
-                const detailValueTags = $("span.a-list-item>span:odd", ".detail-bullet-list");*/
+                const $ = cheerio.load(body);
+                const title = $("div.title");
+                console.log(title);
                 const book: Book = {
                     name: "",
                     uri: uri,

@@ -14,6 +14,6 @@ suite('Extension Test Suite', () => {
 	});
 
 	test('Run Bookworm GenerateInfo', () => {
-		//vscode.commands.executeCommand("bookworm.generateInfo");
+		
 	});
 });
