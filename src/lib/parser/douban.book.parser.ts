@@ -2,17 +2,23 @@ import fetch, { Response } from 'node-fetch';
 import { Book } from '../model/book.type';
 import { BookParser } from './book.parser';
 import * as cheerio from 'cheerio';
+import * as puppeteer from 'puppeteer';
 
-class DoubanBookParser extends BookParser {
+export class DoubanBookParser extends BookParser {
 
     public fetchBook(isbn: string): Promise<Book> {
         return new Promise(async (resolve, reject) => {
             try {
                 isbn = "14919157651";
                 const uri: string = `https://search.douban.com/book/subject_search?search_text=${isbn}&cat=1001`;
-                const resp: Response = await fetch(uri);
-                const body: string = await resp.text();
-                console.log(body);
+                const browser = await puppeteer.launch();
+                const page = await browser.newPage();
+                await page.goto(uri);
+                console.log(page.content);
+                await browser.close();
+                /*const resp: Response = await fetch(uri);
+                const body: string = await resp.text();*/
+                //console.log(body);
                 /*const $ = cheerio.load(body);
                 const detailKeyTags = $("span.a-list-item>span:even", ".detail-bullet-list");
                 const detailValueTags = $("span.a-list-item>span:odd", ".detail-bullet-list");*/

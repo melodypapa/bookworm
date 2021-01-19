@@ -25,7 +25,7 @@ export class Bookworm {
 						throw err;
 					}
 					files.forEach((file) => {
-						if (path.extname(file) == ".bookinfo") {
+						if (path.extname(file) === ".bookinfo") {
 							resolve(path.basename(file));
 						}
 					});
