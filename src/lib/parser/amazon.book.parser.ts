@@ -27,6 +27,9 @@ export class AmazonBookParser extends BookParser {
             try {
                 const uri: string = `https://www.amazon.com/dp/${asin}`;
                 const resp: Response = await fetch(uri);
+                if (resp.status === 404){
+                    throw new BookWormError("Book can not be found");
+                }
                 const body: string = await resp.text();
                 const $ = cheerio.load(body);
                 const detailKeyTags = $("span.a-list-item>span:even", ".detail-bullet-list");

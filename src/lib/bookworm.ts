@@ -1,8 +1,9 @@
 import { Uri, window } from "vscode";
-import { AmazonBookParser} from "./parser/amazon.book.parser";
+import { AmazonBookParser } from "./parser/amazon.book.parser";
 import * as path from 'path';
 import * as fs from 'fs';
 import { Book } from "./model/book.type";
+import { DoubanBookParser } from './parser/douban.book.parser';
 
 export class Bookworm {
 
@@ -21,7 +22,7 @@ export class Bookworm {
 					resolve(isbn);
 				}
 				fs.readdir(basePath, (err, files: string[]) => {
-					if (err){
+					if (err) {
 						throw err;
 					}
 					files.forEach((file) => {
@@ -32,7 +33,7 @@ export class Bookworm {
 					resolve("");
 				});
 			}
-			catch (err){
+			catch (err) {
 				throw err;
 			}
 		});
@@ -40,7 +41,7 @@ export class Bookworm {
 
 	private urlIsPath(uri: Uri): boolean {
 		const stats = fs.statSync(uri.fsPath);
-		if (stats.isDirectory()){
+		if (stats.isDirectory()) {
 			return true;
 		}
 		return false;
@@ -62,9 +63,33 @@ export class Bookworm {
 		return "";
 	}
 
-	private createBookInfoFile(filePath: string, book: Book){
+	private createBookInfoFile(filePath: string, book: Book) {
 		let data = JSON.stringify(book);
 		fs.writeFileSync(filePath, data);
+	}
+
+	private async fetchBookWithAmazon(asin: string): Promise<Book | undefined> {
+		let book = undefined;
+		try {
+			const bookworm = new AmazonBookParser();
+			book = await bookworm.fetchBook(asin);
+		}
+		catch (err) {
+			console.log(err);
+		}
+		return book;
+	}
+
+	private async fetchBookWithDouban(isbn: string): Promise<Book | undefined> {
+		let book = undefined;
+		try {
+			const bookworm = new DoubanBookParser();
+			book = await bookworm.fetchBook(isbn);
+		}
+		catch (err) {
+			console.log(err);
+		}
+		return book;
 	}
 
 	public async onGenerateBookInfo(uri: Uri) {
@@ -72,25 +97,31 @@ export class Bookworm {
 		if (uri instanceof Uri) {
 			isbn = await this.getIsbnFromUri(uri);
 		}
-		if (isbn === ""){
+		if (isbn === "") {
 			window.showInformationMessage("Unknown book");
 			return;
 		}
 
 		try {
 			let bookPath = uri.fsPath;
-			const bookworm = new AmazonBookParser();
-			const book: Book = await bookworm.fetchBook(isbn);
+			let book: Book | undefined;
+			book = await this.fetchBookWithAmazon(isbn);
+			if (book === undefined){
+				book = await this.fetchBookWithDouban(isbn);
+			}
+			if (book === undefined){
+				throw new BookWormError("Book can not be found.");
+			}
 			console.log(book);
-			if (!this.urlIsPath(uri)){
+			if (!this.urlIsPath(uri)) {
 				bookPath = path.dirname(uri.fsPath);
 			}
 			this.createBookInfoFile(path.join(uri.fsPath, `${isbn}.bookinfo`), book);
 			window.showInformationMessage(book.name + " is generated.");
 		}
-		catch (err){
+		catch (err) {
 			window.showErrorMessage(err);
 		}
-		
+
 	}
 }

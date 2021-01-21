@@ -1,0 +1,3 @@
+
+class BookWormError extends Error {
+}

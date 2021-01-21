@@ -13,15 +13,14 @@ export class DoubanBookParser extends BookParser {
                 const uri: string = `https://search.douban.com/book/subject_search?search_text=${isbn}&cat=1001`;
                 const browser = await puppeteer.launch();
                 const page = await browser.newPage();
-                await page.goto(uri);
-                console.log(page.content);
+                await page.goto(uri, {waitUntil: 'networkidle2'});
+                const body: string  = await page.content();
                 await browser.close();
                 /*const resp: Response = await fetch(uri);
                 const body: string = await resp.text();*/
-                //console.log(body);
-                /*const $ = cheerio.load(body);
-                const detailKeyTags = $("span.a-list-item>span:even", ".detail-bullet-list");
-                const detailValueTags = $("span.a-list-item>span:odd", ".detail-bullet-list");*/
+                console.log(body);
+                const $ = cheerio.load(body);
+                const header = $("div#wrapper h1");
                 const book: Book = {
                     name: "",
                     uri: uri,
