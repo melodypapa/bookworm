@@ -2,6 +2,7 @@ import fetch, { Response } from "node-fetch";
 import * as cheerio from "cheerio";
 import { BookParser } from './book.parser';
 import { Book } from "../model/book.type";
+import { BookWormError } from "../error/bookworm.error";
 
 export class AmazonBookParser extends BookParser {
     /** The name list for each month  */

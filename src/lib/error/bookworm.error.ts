@@ -1,3 +1,1 @@
-
-class BookWormError extends Error {
-}
+export class BookWormError extends Error {}

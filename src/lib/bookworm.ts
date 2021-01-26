@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { Book } from "./model/book.type";
 import { DoubanBookParser } from './parser/douban.book.parser';
+import { BookWormError } from "./error/bookworm.error";
 
 export class Bookworm {
 

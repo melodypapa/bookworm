@@ -1,9 +1,8 @@
-import fetch, { Response } from 'node-fetch';
-import { Book } from '../model/book.type';
 import { BookParser } from './book.parser';
 import * as cheerio from 'cheerio';
 import * as puppeteer from 'puppeteer';
-import { Console } from 'console';
+import { BookWormError } from '../error/bookworm.error';
+import { Book } from '../model/book.type';
 
 export class DoubanBookParser extends BookParser {
 
@@ -11,23 +10,23 @@ export class DoubanBookParser extends BookParser {
         return new Promise(async (resolve, reject) => {
             try {
                 const uri: string = `https://search.douban.com/book/subject_search?search_text=${isbn}&cat=1001`;
-                const browser = await puppeteer.launch({ headless: true });
+                const browser = await puppeteer.launch({ headless: false });
                 const page = await browser.newPage();
                 await page.goto(uri);
-                await page.screenshot({ path: 'c:\\tmp\\example.png' });
+                // await page.screenshot({ path: 'c:\\tmp\\example.png' });
                 const body: string = await page.content();
-                
+
                 //console.log(body);
                 const $ = cheerio.load(body);
-                
+
                 const regexLink = /https:\/\/book\.douban\.com\/subject\/\d+\//;
                 const results = $('.item-root a');
-                if (results.length === 0){
+                if (results.length === 0) {
                     throw new BookWormError("Book can not be found");
                 }
                 await browser.close();
-                for (let idx = 0; idx < results.length; idx ++) {
-                    if ($(results[idx]).attr('href')?.match(regexLink)){
+                for (let idx = 0; idx < results.length; idx++) {
+                    if ($(results[idx]).attr('href')?.match(regexLink)) {
                         resolve($(results[idx]).attr('href'));
                         return;
                     }
@@ -44,29 +43,27 @@ export class DoubanBookParser extends BookParser {
         return new Promise(async (resolve, reject) => {
             try {
                 const uri = await this.searchBook(isbn);
-                if (uri === undefined){
+                if (uri === undefined) {
                     throw new BookWormError("Book can not be found");
                 }
 
                 const browser = await puppeteer.launch({ headless: false });
                 const page = await browser.newPage();
                 await page.goto(uri);
-                await page.screenshot({ path: 'c:\\tmp\\example.png' });
+                // await page.screenshot({ path: 'c:\\tmp\\example.png' });
                 const body: string = await page.content();
-                
+
                 //console.log(body);
                 const $ = cheerio.load(body);
-                const regex = /https:\/\/book\.douban\.com\/subject\/\d+\//;
-                const results = $('.item-root a');
-                if (results.length === 0){
-                    throw new BookWormError("Book can not be found");
-                }
-                // await page.goto($(results?[0]).attr('href'));
+                //let bookinfo = $('#info').text().replace(/\n+/g, "\n");
+                let bookinfo = $('#info').text();
+                bookinfo = bookinfo.replace(/\s+/g, " ").trim();                
                 await browser.close();
                 const book: Book = {
-                    name: "",
+                    name: $('#wrapper h1').text(),
                     uri: uri,
                 };
+
                 resolve(book);
             }
             catch (err) {
