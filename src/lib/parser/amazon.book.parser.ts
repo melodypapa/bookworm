@@ -20,7 +20,7 @@ export class AmazonBookParser extends BookParser {
     }
 
     private stripBlank(str: string): string {
-        return str.trim();
+        return str?.trim();
     }
 
     public fetchBook(asin: string): Promise<Book> {
@@ -41,13 +41,14 @@ export class AmazonBookParser extends BookParser {
                     asin: asin
                 };
 
+                //book.imageUrl = $('#imgBlkFront').attr('src');
                 const details = {};
                 for (let idx = 0; idx < detailKeyTags.length; idx++) {
                     const key = $(detailKeyTags[idx]).text().replace(/[\s:]+/, "").toLowerCase();
                     const value = $(detailValueTags[idx]).text();
                     switch (key) {
                         case "publisher":
-                            const match = value.match(/([\w\s']+);?([\w\s]+)?\s?\((\w+)\s+(\d{1,2}),\s+(\d{4})\)/);
+                            const match = value.match(/([\w\s']+);?([\w\s.]+)?\s?\((\w+)\s+(\d{1,2}),\s+(\d{4})\)/);
                             if (match) {
                                 book.publisher = this.stripBlank(match[1]);
                                 book.edition = this.stripBlank(match[2]);

@@ -1,6 +1,7 @@
 export type Book = {
     name: string;
     uri: string;
+    imageUrl?: string;
     publisher?: string;
     edition?: string;
     publishDate?: { year: number, month: number, day?: number };

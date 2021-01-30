@@ -16,12 +16,15 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('bookworm.generateInfo', async (path: vscode.Uri) => {
-		// The code you place here will be executed every time your command is executed
+	context.subscriptions.push(vscode.commands.registerCommand('bookworm.generateInfo', async (path: vscode.Uri) => {
 		bookworm.onGenerateBookInfo(path);
-	});
-
-	context.subscriptions.push(disposable);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('bookworm.generateInfoWithAmazon', async (path: vscode.Uri) => {
+		bookworm.onGenerateBookInfoByAmazon(path);
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('bookworm.generateInfoWithDouban', async (path: vscode.Uri) => {
+		bookworm.onGenerateBookInfoByDouban(path);
+	}));
 }
 
 // this method is called when your extension is deactivated

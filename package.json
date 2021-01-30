@@ -10,6 +10,7 @@
 		"Other"
 	],
 	"activationEvents": [
+		"onStartupFinished",
 		"onCommand:bookworm.generateInfo"
 	],
 	"main": "./dist/extension.js",
@@ -20,6 +21,14 @@
 				"title": "Generate Book Info"
 			},
 			{
+				"command": "bookworm.generateInfoWithAmazon",
+				"title": "Generate Book Info (amazon)"
+			},
+			{
+				"command": "bookworm.generateInfoWithDouban",
+				"title": "Generate Book Info (douban)"
+			},
+			{
 				"command": "bookworm.parsePath",
 				"title": "Parse path"
 			}
@@ -28,6 +37,14 @@
 			"explorer/context": [
 				{
 					"command": "bookworm.generateInfo",
+					"group": "bookworm-ide"
+				},
+				{
+					"command": "bookworm.generateInfoWithAmazon",
+					"group": "bookworm-ide"
+				},
+				{
+					"command": "bookworm.generateInfoWithDouban",
 					"group": "bookworm-ide"
 				}
 			]

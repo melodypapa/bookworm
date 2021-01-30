@@ -6,10 +6,12 @@ import { Book } from "./model/book.type";
 import { DoubanBookParser } from './parser/douban.book.parser';
 import { BookWormError } from "./error/bookworm.error";
 
+const bookInfoExtension = "book.json";
+
 export class Bookworm {
 
 	private isValidIsbn(isbn: string): boolean {
-		if (isbn.match(/^\d(?:-?\d){9}(?:\d{3})?$/)) {
+		if (isbn.match(/^\d(?:-?[\dx]){9}(?:[\dx]{3})?$/i)) {
 			return true;
 		}
 		return false;
@@ -27,7 +29,7 @@ export class Bookworm {
 						throw err;
 					}
 					files.forEach((file) => {
-						if (path.extname(file) === ".bookinfo") {
+						if (path.extname(file) === `.${bookInfoExtension}`) {
 							resolve(path.basename(file));
 						}
 					});
@@ -93,17 +95,30 @@ export class Bookworm {
 		return book;
 	}
 
-	public async onGenerateBookInfo(uri: Uri) {
+	private async checkIsbn(uri: Uri): Promise<string>{
 		let isbn = "";
 		if (uri instanceof Uri) {
 			isbn = await this.getIsbnFromUri(uri);
 		}
 		if (isbn === "") {
 			window.showInformationMessage("Unknown book");
-			return;
+			throw new BookWormError("Invalid book Id");
 		}
+		return isbn;
+	}
 
+	private async generateBookInfoJson(uri: Uri, isbn: string, book: Book){
+		console.log(book);
+		if (!this.urlIsPath(uri)) {
+			let bookPath = path.dirname(uri.fsPath);
+		}
+		this.createBookInfoFile(path.join(uri.fsPath, `${isbn}.${bookInfoExtension}`), book);
+		window.showInformationMessage(book.name + " is generated.");
+	}
+
+	public async onGenerateBookInfo(uri: Uri) {
 		try {
+			let isbn = await this.checkIsbn(uri);
 			let bookPath = uri.fsPath;
 			let book: Book | undefined;
 			book = await this.fetchBookWithAmazon(isbn);
@@ -113,16 +128,42 @@ export class Bookworm {
 			if (book === undefined){
 				throw new BookWormError("Book can not be found.");
 			}
-			console.log(book);
-			if (!this.urlIsPath(uri)) {
-				bookPath = path.dirname(uri.fsPath);
-			}
-			this.createBookInfoFile(path.join(uri.fsPath, `${isbn}.bookinfo`), book);
-			window.showInformationMessage(book.name + " is generated.");
+			this.generateBookInfoJson(uri, isbn, book);
 		}
 		catch (err) {
 			window.showErrorMessage(err);
 		}
+	}
 
+	public async onGenerateBookInfoByAmazon(uri: Uri) {
+		try {
+			let isbn = await this.checkIsbn(uri);
+			let bookPath = uri.fsPath;
+			let book: Book | undefined;
+			book = await this.fetchBookWithAmazon(isbn);
+			if (book === undefined){
+				throw new BookWormError("Book can not be found.");
+			}
+			this.generateBookInfoJson(uri, isbn, book);
+		}
+		catch (err) {
+			window.showErrorMessage(err);
+		}
+	}
+
+	public async onGenerateBookInfoByDouban(uri: Uri) {
+		try {
+			let isbn = await this.checkIsbn(uri);
+			let bookPath = uri.fsPath;
+			let book: Book | undefined;
+			book = await this.fetchBookWithDouban(isbn);
+			if (book === undefined){
+				throw new BookWormError("Book can not be found.");
+			}
+			this.generateBookInfoJson(uri, isbn, book);
+		}
+		catch (err) {
+			window.showErrorMessage(err);
+		}
 	}
 }
