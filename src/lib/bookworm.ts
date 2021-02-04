@@ -93,7 +93,7 @@ export class Bookworm {
 	}
 
 	private createBookInfoFile(filePath: string, book: Book) {
-		let data = JSON.stringify(book);
+		let data = JSON.stringify(book, null, 4);
 		fs.writeFileSync(filePath, data);
 	}
 
@@ -193,13 +193,22 @@ export class Bookworm {
 		}
 	}
 
+	private formatPath(pathName:string): string {
+		let format = pathName;
+		format = format.replace(/c\#/gi, "CSharp");
+		format = format.replace(/.net/gi, "DotNet");
+		format = format.replace(/[:&{},®]/g, "");
+		format = format.replace(/[\s']+/g, ".");
+		format = format.replace(/\.\w/g, c => c.toUpperCase());
+		return format;
+	}
+
 	public async onFormatPath(uri: Uri) {
 		try {
 			const book = await this.loadBookInfoFile(uri.fsPath);
 			let pathName = "";
 			pathName = `${book.publisher}.${book.name}.${book.publishDate?.year}`;
-			pathName = pathName.replace(/[:]/, "");
-			pathName = pathName.replace(/\s+/g, ".");
+			pathName = this.formatPath(pathName);
 			let result = await window.showInputBox({
 				value: pathName,
 				// valueSelection: [2, 4],
@@ -214,7 +223,7 @@ export class Bookworm {
 			}
 			pathName = path.join(path.dirname(uri.fsPath), result);
 			fs.renameSync(uri.fsPath, pathName);
-			window.showInformationMessage(`${uri.fsPath} => ${pathName}`);
+			window.showInformationMessage(`${path.basename(uri.fsPath)} => ${result}`);
 		}
 		catch (err){
 			window.showErrorMessage(err);
