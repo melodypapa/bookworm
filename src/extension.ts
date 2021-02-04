@@ -25,6 +25,9 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('bookworm.generateInfoWithDouban', async (path: vscode.Uri) => {
 		bookworm.onGenerateBookInfoByDouban(path);
 	}));
+	context.subscriptions.push(vscode.commands.registerCommand('bookworm.formatPath', async (path: vscode.Uri) => {
+		bookworm.onFormatPath(path);
+	}));
 }
 
 // this method is called when your extension is deactivated

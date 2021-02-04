@@ -1,20 +1,12 @@
 # bookworm
 
-This is the README for your extension "bookworm". After writing up a brief description, we recommend including the following sections.
+One extension to manage the ebook.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+* Query the ebook from Amazon or douban with ISBN
+* Store the ebook information to json
+* Format the eBook path with book information json
 
 ## Extension Settings
 
@@ -35,19 +27,12 @@ Calling out known issues can help limit users opening duplicate issues against y
 
 Users appreciate release notes as you update your extension.
 
-### 1.0.0
+### 0.0.1
 
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
+1. Query the bookworm with amazon
+2. Store the book information to json
+3. Load the book information from json
+4. Format the path according to book information
 
 ## Refereance
 

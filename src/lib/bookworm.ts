@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import { Book } from "./model/book.type";
 import { DoubanBookParser } from './parser/douban.book.parser';
 import { BookWormError } from "./error/bookworm.error";
+import { glob } from "glob";
 
 const bookInfoExtension = "book.json";
 
@@ -37,7 +38,7 @@ export class Bookworm {
 				});
 			}
 			catch (err) {
-				throw err;
+				reject(err);
 			}
 		});
 	}
@@ -64,6 +65,31 @@ export class Bookworm {
 			return isbn;
 		}
 		return "";
+	}
+
+	private loadBookInfoFile(filePath: string): Promise<Book> {
+		return new Promise((resolve, reject) => {
+			try {
+				glob(path.join(filePath, "/*.book.json"), (err, matches) => {
+					if (err) {
+						throw err;
+					}
+					if (matches.length === 0) {
+						throw new BookWormError(`Cannot find any book.json in the ${filePath}`);
+					}
+					fs.readFile(matches[0], 'utf8', (err, data) => {
+						if (err) {
+							throw err;
+						}
+						const book = JSON.parse(data);
+						resolve(book);
+					});
+				});
+			}
+			catch (err) {
+				reject(err);
+			}
+		});
 	}
 
 	private createBookInfoFile(filePath: string, book: Book) {
@@ -95,7 +121,7 @@ export class Bookworm {
 		return book;
 	}
 
-	private async checkIsbn(uri: Uri): Promise<string>{
+	private async checkIsbn(uri: Uri): Promise<string> {
 		let isbn = "";
 		if (uri instanceof Uri) {
 			isbn = await this.getIsbnFromUri(uri);
@@ -107,7 +133,7 @@ export class Bookworm {
 		return isbn;
 	}
 
-	private async generateBookInfoJson(uri: Uri, isbn: string, book: Book){
+	private async generateBookInfoJson(uri: Uri, isbn: string, book: Book) {
 		console.log(book);
 		if (!this.urlIsPath(uri)) {
 			let bookPath = path.dirname(uri.fsPath);
@@ -122,10 +148,10 @@ export class Bookworm {
 			let bookPath = uri.fsPath;
 			let book: Book | undefined;
 			book = await this.fetchBookWithAmazon(isbn);
-			if (book === undefined){
+			if (book === undefined) {
 				book = await this.fetchBookWithDouban(isbn);
 			}
-			if (book === undefined){
+			if (book === undefined) {
 				throw new BookWormError("Book can not be found.");
 			}
 			this.generateBookInfoJson(uri, isbn, book);
@@ -141,7 +167,7 @@ export class Bookworm {
 			let bookPath = uri.fsPath;
 			let book: Book | undefined;
 			book = await this.fetchBookWithAmazon(isbn);
-			if (book === undefined){
+			if (book === undefined) {
 				throw new BookWormError("Book can not be found.");
 			}
 			this.generateBookInfoJson(uri, isbn, book);
@@ -157,12 +183,40 @@ export class Bookworm {
 			let bookPath = uri.fsPath;
 			let book: Book | undefined;
 			book = await this.fetchBookWithDouban(isbn);
-			if (book === undefined){
+			if (book === undefined) {
 				throw new BookWormError("Book can not be found.");
 			}
 			this.generateBookInfoJson(uri, isbn, book);
 		}
 		catch (err) {
+			window.showErrorMessage(err);
+		}
+	}
+
+	public async onFormatPath(uri: Uri) {
+		try {
+			const book = await this.loadBookInfoFile(uri.fsPath);
+			let pathName = "";
+			pathName = `${book.publisher}.${book.name}.${book.publishDate?.year}`;
+			pathName = pathName.replace(/[:]/, "");
+			pathName = pathName.replace(/\s+/g, ".");
+			let result = await window.showInputBox({
+				value: pathName,
+				// valueSelection: [2, 4],
+				// placeHolder: 'For example: fedcba. But not: 123',
+				/*validateInput: text => {
+					window.showInformationMessage(`Validating: ${text}`);
+					return text === '123' ? 'Not 123!' : null;
+				}*/
+			});
+			if (!result){
+				throw new BookWormError("Invalid Path");
+			}
+			pathName = path.join(path.dirname(uri.fsPath), result);
+			fs.renameSync(uri.fsPath, pathName);
+			window.showInformationMessage(`${uri.fsPath} => ${pathName}`);
+		}
+		catch (err){
 			window.showErrorMessage(err);
 		}
 	}

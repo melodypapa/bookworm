@@ -3,6 +3,11 @@
 	"displayName": "bookworm",
 	"description": "vscode extension for book management",
 	"version": "0.0.1",
+	"publisher": "melodypapa",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/melodypapa/bookworm.git"
+	},
 	"engines": {
 		"vscode": "^1.52.0"
 	},
@@ -29,12 +34,22 @@
 				"title": "Generate Book Info (douban)"
 			},
 			{
+				"command": "bookworm.formatPath",
+				"title": "Format Path"
+			},
+			{
 				"command": "bookworm.parsePath",
 				"title": "Parse path"
 			}
 		],
 		"menus": {
 			"explorer/context": [
+				{
+					"submenu": "bookworm-explorer/bookworm",
+					"group": "bookworm-ide"
+				}
+			],
+			"bookworm-explorer/bookworm": [
 				{
 					"command": "bookworm.generateInfo",
 					"group": "bookworm-ide"
@@ -46,9 +61,19 @@
 				{
 					"command": "bookworm.generateInfoWithDouban",
 					"group": "bookworm-ide"
+				},
+				{
+					"command": "bookworm.formatPath",
+					"group": "bookworm-ide"
 				}
 			]
-		}
+		},
+		"submenus": [
+			{
+				"id": "bookworm-explorer/bookworm",
+				"label": "Bookworm"
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run package",
